@@ -11,30 +11,34 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(expressIp().getIpInfoMiddleware);
 
-const hedefler = ["http://160.20.109.251/", "http://185.254.238.19/"];
+const defaultTarget = "http://160.20.109.251/";
+const backupTarget = "http://185.254.238.19/";
 
 app.use("/", (req, res) => {
   const clientIpInfo = req.ipInfo;
 
-  // Eğer isteğin geldiği ülke Türkiye ise, ilk hedefi seç
-  if (clientIpInfo && clientIpInfo.country === "TR") {
-    return createProxyMiddleware({
-      target: hedefler[0],
-      changeOrigin: true,
-      onProxyReq: fixRequestBody,
-    })(req, res);
-  }
+  // Choose the target based on the client's country
+  const target =
+    clientIpInfo && clientIpInfo.country === "TR" ? backupTarget : defaultTarget;
 
-  // Diğer durumda, ikinci hedefi seç
-  return createProxyMiddleware({
-    target: hedefler[1],
+  const proxyMiddleware = createProxyMiddleware({
+    target,
     changeOrigin: true,
     onProxyReq: fixRequestBody,
-  })(req, res);
+  });
+
+  proxyMiddleware(req, res, (err) => {
+    if (err) {
+      console.error("Proxy Error:", err);
+      res.status(500).send("Proxy Error");
+    }
+  });
 });
 
-app.listen(80, () => {
+const PORT = process.env.PORT || 80;
+
+app.listen(PORT, () => {
   console.log(
-    "Reverse Proxy Başlatıldı! http://localhost:80 adresinden erişebilirsiniz. (DDOS Korumalı bir sunucu üzerinde çalıştırarak kullanmanız tavsiye edilir.)",
+    `Reverse Proxy Başlatıldı! http://localhost:${PORT} adresinden erişebilirsiniz. (DDOS Korumalı bir sunucu üzerinde çalıştırarak kullanmanız tavsiye edilir.)`,
   );
 });
