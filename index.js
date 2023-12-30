@@ -19,7 +19,7 @@ app.use("/", (req, res) => {
   // Eğer isteğin geldiği ülke Türkiye ise, ilk hedefi seç
   if (clientIpInfo && clientIpInfo.country === "TR") {
     return createProxyMiddleware({
-      target: hedefler[1],
+      target: hedefler[0],
       changeOrigin: true,
       onProxyReq: fixRequestBody,
     })(req, res);
@@ -27,7 +27,7 @@ app.use("/", (req, res) => {
 
   // Diğer durumda, ikinci hedefi seç
   return createProxyMiddleware({
-    target: hedefler[0],
+    target: hedefler[1],
     changeOrigin: true,
     onProxyReq: fixRequestBody,
   })(req, res);
