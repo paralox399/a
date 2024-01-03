@@ -7,7 +7,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/', (req, res) => {
-    const target = "https://google.com/"; // Yönlendirilecek adres
+    const target = "http://160.20.109.251/"; // Yönlendirilecek adres
     if (!target) {
         return res.sendStatus(500);
     }
